@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CureX Pro - 25 Medical Guide</title>
+    <style>
+        :root { --primary: #004a99; --accent: #d32f2f; --warn: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: linear-gradient(135deg, #004a99 0%, #00d4ff 100%); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        .app-card { width: 100%; max-width: 500px; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header img { width: 80px; border-radius: 12px; }
+        h1 { color: var(--primary); margin: 5px 0; font-size: 24px; }
+
+        .input-group { margin-bottom: 20px; }
+        select { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 15px; font-size: 16px; outline: none; cursor: pointer; background: #f9f9f9; }
+        
+        #resultBox { display: none; background: #fff; border-radius: 20px; border: 1px solid #eee; overflow: hidden; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .res-head { background: var(--primary); color: white; padding: 15px; font-weight: bold; font-size: 18px; text-align: center; }
+        .info-section { padding: 15px; border-bottom: 1px solid #f0f0f0; }
+        .label { font-weight: bold; color: var(--primary); font-size: 11px; display: block; text-transform: uppercase; margin-bottom: 4px; }
+        .value { font-size: 14px; color: #333; line-height: 1.4; }
+        
+        .warning-box { background: #fff3e0; border-left: 5px solid var(--warn); }
+        .preg-box { background: #fce4ec; border-left: 5px solid #e91e63; }
+        
+        .footer-disc { font-size: 11px; color: #777; margin-top: 20px; text-align: center; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="header">
+        <img src="logo.png.jpeg.jpeg" alt="Logo">
+        <h1>CureX Pro</h1>
+        <p style="font-size: 13px; color: #666;">Detailed Medical Guide (25 Disease)</p>
+    </div>
+
+    <div class="input-group">
+        <select id="diseaseSelect" onchange="showData()">
+            <option value="">-- Choose Disease / நோய் தேர்ந்தெடு --</option>
+        </select>
+    </div>
+
+    <div id="resultBox">
+        <div id="resName" class="res-head"></div>
+        
+        <div class="info-section">
+            <span class="label">💊 Drug Name / மருந்து:</span>
+            <span id="resDrug" class="value"></span>
+        </div>
+
+        <div class="info-section">
+            <span class="label">📏 Dosage & When to Take:</span>
+            <span id="resDose" class="value"></span>
+        </div>
+
+        <div class="info-section warning-box">
+            <span class="label" style="color: #e65100;">⚠️ Drug Warning:</span>
+            <span id="resWarn" class="value" style="color: var(--accent); font-weight: bold;"></span>
+        </div>
+
+        <div class="info-section preg-box">
+            <span class="label" style="color: #c2185b;">🤰 Pregnancy / தாய்ப்பால்:</span>
+            <span id="resPreg" class="value"></span>
+        </div>
+
+        <div class="info-section">
+            <span class="label">🔞 Age Limit:</span>
+            <span id="resAge" class="value"></span>
+        </div>
+
+        <div class="info-section">
+            <span class="label">🔄 Comparison & Alternatives:</span>
+            <span id="resComp" class="value"></span>
+        </div>
+
+        <div class="info-section">
+            <span class="label">📉 Side Effects:</span>
+            <span id="resSide" class="value"></span>
+        </div>
+
+        <div class="info-section">
+            <span class="label">🏠 Storage & Lifespan:</span>
+            <span id="resStorage" class="value"></span>
+        </div>
+    </div>
+
+    <p class="footer-disc">⚠️ <b>Disclaimer:</b> Not for self-treatment,Only for education purpose.Consult a Doctor.<br>இது மருத்துவ ஆலோசனை அல்ல,கல்வி நோக்கத்திற்காக மட்டுமே. மருத்துவரை அணுகவும்.</p>
+</div>
+
+<script>
+const medicalData = {
+    "fever": { n: "Fever / காய்ச்சல்", d: "Paracetamol (Dolo 650)", ds: "650mg, Max 4 times | After Food", w: "Do not exceed 4g/day. Liver risk.", p: "Safe under doctor supervision.", a: "All ages (Dose varies for kids)", c: "Alt: Ibuprofen. Paracetamol is safer for stomach.", s: "Nausea, skin rash (rare)", st: "Room temp. Life: 3 years." },
+    "cold": { n: "Common Cold / சளி", d: "Cetirizine", ds: "10mg | Night (Before Bed)", w: "Causes drowsiness. Do not drive.", p: "Consult doctor before use.", a: "Adults and kids (as per weight).", c: "Alt: Levocetirizine. Better for allergies.", s: "Sleepiness, dry mouth", st: "Cool, dry place. Life: 2 years." },
+    "headache": { n: "Headache / தலைவலி", d: "Naproxen / Aspirin", ds: "250-500mg | After Food", w: "Risk of stomach ulcers. Avoid on empty stomach.", p: "Avoid, especially in last trimester.", a: "Not for kids under 12.", c: "Alt: Paracetamol (Safer side).", s: "Heartburn, dizziness", st: "Keep dry. Life: 3 years." },
+    "stomach pain": { n: "Stomach Pain / வயிற்று வலி", d: "Dicyclomine (Meftal Spas)", ds: "10-20mg | When needed", w: "Avoid if you have glaucoma or kidney issues.", p: "Consult doctor. Generally avoided.", a: "Adults mostly.", c: "Alt: Hyoscine. Works on cramps.", s: "Blurred vision, dry mouth", st: "Below 30°C. Life: 2 years." },
+    "cough": { n: "Cough / இருமல்", d: "Dextromethorphan (Dry Cough)", ds: "10ml | Thrice a day", w: "Check if dry or wet cough before taking.", p: "Avoid unless necessary.", a: "Check pediatric labels for kids.", c: "Alt: Bromhexine (for Wet Cough).", s: "Drowsiness, stomach upset", st: "Tighten cap. Life: 2 years." },
+    "acidity": { n: "Acidity / நெஞ்செரிச்சல்", d: "Pantoprazole / Omeprazole", ds: "40mg | Morning (Empty Stomach)", w: "Long term use affects B12 and bones.", p: "Safe if prescribed.", a: "Adults usually.", c: "Alt: Ranitidine or Antacid Gels.", s: "Headache, diarrhea", st: "Cool place. Life: 2 years." },
+    "vomiting": { n: "Vomiting / வாந்தி", d: "Ondansetron (Ondem)", ds: "4-8mg | Before Food", w: "Can affect heart rhythm in some patients.", p: "Commonly used for morning sickness (Dr advice).", a: "Safe for kids in liquid form.", c: "Alt: Domperidone.", s: "Constipation, headache", st: "Protect from light. Life: 3 years." },
+    "diarrhea": { n: "Diarrhea / வயிற்றுப்போக்கு", d: "Loperamide", ds: "2mg | After each loose stool", w: "Avoid if blood is in stool (Infection).", p: "Consult doctor.", a: "Not for kids under 2 years.", c: "Alt: ORS (Must for hydration).", s: "Abdominal cramps", st: "Room temp. Life: 3 years." },
+    "constipation": { n: "Constipation / மலசிக்கல்", d: "Bisacodyl (Dulcolax)", ds: "5-10mg | Night (Before Bed)", w: "Do not use daily. Can cause dependency.", p: "Consult doctor.", a: "Adults and kids above 6.", c: "Alt: Cremaffin (Liquid).", s: "Stomach cramps", st: "Dry place. Life: 3 years." },
+    "asthma": { n: "Asthma / ஆஸ்துமா", d: "Salbutamol (Inhaler)", ds: "1-2 Puffs | When needed", w: "Rinse mouth after use to avoid fungal infection.", p: "Safe and essential.", a: "All ages.", c: "Alt: Montelukast (Tablets).", s: "Shaking hands, fast heart rate", st: "Below 25°C. Don't puncture." },
+    "diabetes": { n: "Diabetes / சர்க்கரை", d: "Metformin", ds: "500mg | With Meals", w: "Monitor kidney function regularly.", p: "Insulin is preferred.", a: "Adults mainly.", c: "Alt: Glimepiride.", s: "Gas, metallic taste", st: "Keep dry. Life: 2 years." },
+    "bp": { n: "High BP / ரத்த அழுத்தம்", d: "Amlodipine", ds: "5mg | Morning Fixed Time", w: "Do not stop suddenly. BP may spike.", p: "Consult Doctor. Avoided.", a: "Adults only.", c: "Alt: Telmisartan.", s: "Ankle swelling", st: "Protect from light. Life: 2 years." },
+    "body pain": { n: "Body Pain / உடல் வலி", d: "Diclofenac / Aceclofenac", ds: "50-100mg | After Food", w: "High risk of kidney damage if long term.", p: "Avoid in last 3 months.", a: "Adults mostly.", c: "Alt: Ibuprofen.", s: "Stomach irritation", st: "Cool place. Life: 3 years." },
+    "thyroid": { n: "Thyroid / தைராய்டு", d: "Levothyroxine", ds: "Based on TSH | Morning (Empty Stomach)", w: "Wait 1 hour before eating or tea/coffee.", p: "Crucial. Dose may increase.", a: "All ages.", c: "No alternatives for this hormone.", s: "Weight change, hair loss", st: "Dark, cool place." },
+    "cholesterol": { n: "Cholesterol / கொழுப்பு", d: "Atorvastatin", ds: "10-20mg | Night (Before Bed)", w: "Avoid Grapefruit. Report muscle pain.", p: "Strictly avoid.", a: "Adults.", c: "Alt: Rosuvastatin.", s: "Muscle pain, weakness", st: "Room temp. Life: 2 years." },
+    "arthritis": { n: "Arthritis / மூட்டு வலி", d: "Etoricoxib", ds: "60-90mg | After Food", w: "Not for heart patients.", p: "Avoid.", a: "Adults above 16.", c: "Alt: Naproxen.", s: "Fluid retention, dizziness", st: "Dry place. Life: 2 years." },
+    "anxiety": { n: "Anxiety / பதட்டம்", d: "Alprazolam (Zolax)", ds: "0.25mg | Night (As prescribed)", w: "Highly addictive. Strict medical supervision.", p: "Avoid. Can affect baby.", a: "Adults only.", c: "Alt: Diazepam.", s: "Drowsiness, confusion", st: "Schedule X. Keep locked." },
+    "infection": { n: "Infection / தொற்று", d: "Amoxicillin (Antibiotic)", ds: "500mg | Every 8-12 hours", w: "Complete the full course. Don't stop early.", p: "Generally safe.", a: "Dose varies by weight.", c: "Alt: Azithromycin.", s: "Loose stools, rash", st: "Below 25°C. Life: 2 years." },
+    "ulcer": { n: "Ulcer / புண்", d: "Sucralfate (Syrup)", ds: "10ml | 1 Hour before food", w: "Don't take other meds within 2 hours of this.", p: "Consult doctor.", a: "Adults.", c: "Alt: Antacids.", s: "Constipation", st: "Shake well before use." },
+    "skin rash": { n: "Skin Rash / தோல் தடிப்பு", d: "Hydrocortisone (Cream)", ds: "Apply thin layer | Twice a day", w: "Don't use on face for long time.", p: "Safe for short term.", a: "All ages.", c: "Alt: Calamine Lotion.", s: "Skin thinning, burning", st: "Keep tube closed." },
+    "migraine": { n: "Migraine / ஒற்றைத் தலைவலி", d: "Sumatriptan", ds: "25-50mg | When pain starts", w: "Not for heart or high BP patients.", p: "Consult Neurologist.", a: "Adults.", c: "Alt: Naproxen.", s: "Chest tightness, flushing", st: "Protect from light." },
+    "toothache": { n: "Toothache / பல் வலி", d: "Ketorolac (Keterol DT)", ds: "10mg | Dissolve in water", w: "Use for max 5 days. Hard on kidneys.", p: "Avoid.", a: "Adults.", c: "Alt: Ibuprofen + Paracetamol.", s: "Stomach pain", st: "Keep dry." },
+    "fungal": { n: "Fungal / படர்தாமரை", d: "Fluconazole", ds: "150mg | Once a week (Usually)", w: "Can interact with many other drugs.", p: "Avoid. Risk to fetus.", a: "Adults.", c: "Alt: Itraconazole.", s: "Stomach upset, liver changes", st: "Room temp." },
+    "piles": { n: "Piles / மூலம்", d: "Calcium Dobesilate", ds: "500mg | Twice a day", w: "Monitor for fever or sore throat.", p: "Consult doctor.", a: "Adults.", c: "Alt: Lidocaine Ointment.", s: "Fever, skin rash", st: "Cool place." },
+    "anemia": { n: "Anemia / ரத்த சோகை", d: "Ferrous Sulfate (Iron)", ds: "200mg | Empty Stomach (if tolerated)", w: "Do not take with tea, coffee or milk.", p: "Essential. Usually prescribed.", a: "All ages.", c: "Alt: Iron Injections.", s: "Black stool, constipation", st: "Keep away from kids." }
+};
+
+const select = document.getElementById('diseaseSelect');
+const diseases = Object.keys(medicalData).sort();
+
+diseases.forEach(dis => {
+    let opt = document.createElement('option');
+    opt.value = dis;
+    opt.innerHTML = medicalData[dis].n;
+    select.appendChild(opt);
+});
+
+function showData() {
+    const val = select.value;
+    const box = document.getElementById('resultBox');
+    
+    if (medicalData[val]) {
+        const d = medicalData[val];
+        document.getElementById('resName').innerText = d.n;
+        document.getElementById('resDrug').innerText = d.d;
+        document.getElementById('resDose').innerText = d.ds;
+        document.getElementById('resWarn').innerText = d.w;
+        document.getElementById('resPreg').innerText = d.p;
+        document.getElementById('resAge').innerText = d.a;
+        document.getElementById('resComp').innerText = d.c;
+        document.getElementById('resSide').innerText = d.s;
+        document.getElementById('resStorage').innerText = d.st;
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
+}
+</script>
+</body>
+</html>
