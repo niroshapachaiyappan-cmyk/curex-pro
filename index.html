@@ -3,132 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CureX Pro - 25 Medical Guide</title>
+    <title>CureX Pro - Medical Guide</title>
     <style>
         :root { --primary: #004a99; --accent: #d32f2f; --warn: #ff9800; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: linear-gradient(135deg, #004a99 0%, #00d4ff 100%); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .app-card { width: 100%; max-width: 500px; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: linear-gradient(135deg, #004a99 0%, #00d4ff 100%); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        .app-card { width: 100%; max-width: 550px; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); margin-bottom: 20px; }
         .header { text-align: center; margin-bottom: 20px; }
-        .header img { width: 80px; border-radius: 12px; }
-        h1 { color: var(--primary); margin: 5px 0; font-size: 24px; }
+        .header h1 { color: var(--primary); margin: 5px 0; font-size: 26px; }
+        
+        .search-container { margin-bottom: 15px; }
+        input#searchInput { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input#searchInput:focus { border-color: var(--primary); }
 
         .input-group { margin-bottom: 20px; }
-        select { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 15px; font-size: 16px; outline: none; cursor: pointer; background: #f9f9f9; }
+        select { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 15px; font-size: 16px; outline: none; cursor: pointer; background: #f9f9f9; transition: 0.3s; }
+        select:focus { border-color: var(--primary); }
         
         #resultBox { display: none; background: #fff; border-radius: 20px; border: 1px solid #eee; overflow: hidden; animation: slideUp 0.4s ease; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .res-head { background: var(--primary); color: white; padding: 15px; font-weight: bold; font-size: 18px; text-align: center; }
+        .res-head { background: var(--primary); color: white; padding: 18px; font-weight: bold; font-size: 18px; text-align: center; }
         .info-section { padding: 15px; border-bottom: 1px solid #f0f0f0; }
-        .label { font-weight: bold; color: var(--primary); font-size: 11px; display: block; text-transform: uppercase; margin-bottom: 4px; }
-        .value { font-size: 14px; color: #333; line-height: 1.4; }
+        .label { font-weight: bold; color: var(--primary); font-size: 12px; display: block; text-transform: uppercase; margin-bottom: 4px; }
+        .value { font-size: 15px; color: #333; line-height: 1.5; }
         
         .warning-box { background: #fff3e0; border-left: 5px solid var(--warn); }
         .preg-box { background: #fce4ec; border-left: 5px solid #e91e63; }
-        
-        .footer-disc { font-size: 11px; color: #777; margin-top: 20px; text-align: center; line-height: 1.5; }
+        .footer-disc { font-size: 11px; color: #eee; text-align: center; line-height: 1.5; max-width: 500px; margin: 10px auto; }
+        b { color: #fff; }
     </style>
 </head>
 <body>
 
-<div class="app-card">
-    <div class="header">
-        <img src="logo.png.jpeg.jpeg" alt="Logo">
-        <h1>CureX Pro</h1>
-        <p style="font-size: 13px; color: #666;">Detailed Medical Guide (25 Disease)</p>
+<div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="app-card">
+        <div class="header">
+            <img src="log.png" alt="CureX Pro Logo" style="width: 80px; height: 80px;">
+            <h1>CureX Pro</h1>
+            <p style="font-size: 13px; color: #666;">மருத்துவ தகவல் வழிகாட்டி (Disease to Drug)</p>
+        </div>
+         <div class="input-group">
+            <select id="diseaseSelect" onchange="showData()">
+                <option value="">-- Choose Disease / நோய் தேர்ந்தெடு --</option>
+            </select>
+        </div>
+
+        <div id="resultBox">
+            <div id="resName" class="res-head"></div>
+            
+            <div class="info-section">
+                <span class="label">💊 Drug Name / மருந்தின் பெயர்:</span>
+                <span id="resDrug" class="value"></span>
+            </div>
+
+            <div class="info-section">
+                <span class="label">📏 Dosage & Time / அளவு மற்றும் எடுக்கும் முறை:</span>
+                <span id="resDose" class="value"></span>
+            </div>
+
+            <div class="info-section warning-box">
+                <span class="label"> Disclaimer :/எச்சரிக்கை: </span>
+                <span id="resWarn" class="value" style="color: var(--accent); font-weight: bold;"></span>
+            </div>
+
+            <div class="info-section preg-box">
+                <span class="label" style="color: #c2185b;">🤰 Pregnancy / கர்ப்பகாலம்:</span>
+                <span id="resPreg" class="value"></span>
+            </div>
+
+            <div class="info-section">
+                <span class="label">🔞 Age Limit / வயது வரம்பு:</span>
+                <span id="resAge" class="value"></span>
+            </div>
+
+            <div class="info-section">
+                <span class="label">🔄 Alternatives / மாற்று மருந்துகள்:</span>
+                <span id="resComp" class="value"></span>
+            </div>
+
+            <div class="info-section">
+                <span class="label">📉 Side Effects / பக்க விளைவுகள்:</span>
+                <span id="resSide" class="value"></span>
+            </div>
+
+            <div class="info-section">
+                <span class="label">🏠 Storage / சேமிப்பு முறை:</span>
+                <span id="resStorage" class="value"></span>
+            </div>
+        </div>
     </div>
-
-    <div class="input-group">
-        <select id="diseaseSelect" onchange="showData()">
-            <option value="">-- Choose Disease / நோய் தேர்ந்தெடு --</option>
-        </select>
-    </div>
-
-    <div id="resultBox">
-        <div id="resName" class="res-head"></div>
-        
-        <div class="info-section">
-            <span class="label">💊 Drug Name / மருந்து:</span>
-            <span id="resDrug" class="value"></span>
-        </div>
-
-        <div class="info-section">
-            <span class="label">📏 Dosage & When to Take:</span>
-            <span id="resDose" class="value"></span>
-        </div>
-
-        <div class="info-section warning-box">
-            <span class="label" style="color: #e65100;">⚠️ Drug Warning:</span>
-            <span id="resWarn" class="value" style="color: var(--accent); font-weight: bold;"></span>
-        </div>
-
-        <div class="info-section preg-box">
-            <span class="label" style="color: #c2185b;">🤰 Pregnancy / தாய்ப்பால்:</span>
-            <span id="resPreg" class="value"></span>
-        </div>
-
-        <div class="info-section">
-            <span class="label">🔞 Age Limit:</span>
-            <span id="resAge" class="value"></span>
-        </div>
-
-        <div class="info-section">
-            <span class="label">🔄 Comparison & Alternatives:</span>
-            <span id="resComp" class="value"></span>
-        </div>
-
-        <div class="info-section">
-            <span class="label">📉 Side Effects:</span>
-            <span id="resSide" class="value"></span>
-        </div>
-
-        <div class="info-section">
-            <span class="label">🏠 Storage & Lifespan:</span>
-            <span id="resStorage" class="value"></span>
-        </div>
-    </div>
-
-    <p class="footer-disc">⚠️ <b>Disclaimer:</b> Not for self-treatment,Only for education purpose.Consult a Doctor.<br>இது மருத்துவ ஆலோசனை அல்ல,கல்வி நோக்கத்திற்காக மட்டுமே. மருத்துவரை அணுகவும்.</p>
+    <p class="footer-disc"><b>Disclaimer:</b> Not for self-treatment. This app is for informational purposes only. Consult a Doctor.<br>இது மருத்துவ ஆலோசனை அல்ல. சுயமாக மருந்து எடுப்பதை தவிர்க்கவும். மருத்துவரை அணுகவும்.</p>
 </div>
 
 <script>
 const medicalData = {
-    "fever": { n: "Fever / காய்ச்சல்", d: "Paracetamol (Dolo 650)", ds: "650mg, Max 4 times | After Food", w: "Do not exceed 4g/day. Liver risk.", p: "Safe under doctor supervision.", a: "All ages (Dose varies for kids)", c: "Alt: Ibuprofen. Paracetamol is safer for stomach.", s: "Nausea, skin rash (rare)", st: "Room temp. Life: 3 years." },
-    "cold": { n: "Common Cold / சளி", d: "Cetirizine", ds: "10mg | Night (Before Bed)", w: "Causes drowsiness. Do not drive.", p: "Consult doctor before use.", a: "Adults and kids (as per weight).", c: "Alt: Levocetirizine. Better for allergies.", s: "Sleepiness, dry mouth", st: "Cool, dry place. Life: 2 years." },
-    "headache": { n: "Headache / தலைவலி", d: "Naproxen / Aspirin", ds: "250-500mg | After Food", w: "Risk of stomach ulcers. Avoid on empty stomach.", p: "Avoid, especially in last trimester.", a: "Not for kids under 12.", c: "Alt: Paracetamol (Safer side).", s: "Heartburn, dizziness", st: "Keep dry. Life: 3 years." },
-    "stomach pain": { n: "Stomach Pain / வயிற்று வலி", d: "Dicyclomine (Meftal Spas)", ds: "10-20mg | When needed", w: "Avoid if you have glaucoma or kidney issues.", p: "Consult doctor. Generally avoided.", a: "Adults mostly.", c: "Alt: Hyoscine. Works on cramps.", s: "Blurred vision, dry mouth", st: "Below 30°C. Life: 2 years." },
-    "cough": { n: "Cough / இருமல்", d: "Dextromethorphan (Dry Cough)", ds: "10ml | Thrice a day", w: "Check if dry or wet cough before taking.", p: "Avoid unless necessary.", a: "Check pediatric labels for kids.", c: "Alt: Bromhexine (for Wet Cough).", s: "Drowsiness, stomach upset", st: "Tighten cap. Life: 2 years." },
-    "acidity": { n: "Acidity / நெஞ்செரிச்சல்", d: "Pantoprazole / Omeprazole", ds: "40mg | Morning (Empty Stomach)", w: "Long term use affects B12 and bones.", p: "Safe if prescribed.", a: "Adults usually.", c: "Alt: Ranitidine or Antacid Gels.", s: "Headache, diarrhea", st: "Cool place. Life: 2 years." },
-    "vomiting": { n: "Vomiting / வாந்தி", d: "Ondansetron (Ondem)", ds: "4-8mg | Before Food", w: "Can affect heart rhythm in some patients.", p: "Commonly used for morning sickness (Dr advice).", a: "Safe for kids in liquid form.", c: "Alt: Domperidone.", s: "Constipation, headache", st: "Protect from light. Life: 3 years." },
-    "diarrhea": { n: "Diarrhea / வயிற்றுப்போக்கு", d: "Loperamide", ds: "2mg | After each loose stool", w: "Avoid if blood is in stool (Infection).", p: "Consult doctor.", a: "Not for kids under 2 years.", c: "Alt: ORS (Must for hydration).", s: "Abdominal cramps", st: "Room temp. Life: 3 years." },
-    "constipation": { n: "Constipation / மலசிக்கல்", d: "Bisacodyl (Dulcolax)", ds: "5-10mg | Night (Before Bed)", w: "Do not use daily. Can cause dependency.", p: "Consult doctor.", a: "Adults and kids above 6.", c: "Alt: Cremaffin (Liquid).", s: "Stomach cramps", st: "Dry place. Life: 3 years." },
-    "asthma": { n: "Asthma / ஆஸ்துமா", d: "Salbutamol (Inhaler)", ds: "1-2 Puffs | When needed", w: "Rinse mouth after use to avoid fungal infection.", p: "Safe and essential.", a: "All ages.", c: "Alt: Montelukast (Tablets).", s: "Shaking hands, fast heart rate", st: "Below 25°C. Don't puncture." },
-    "diabetes": { n: "Diabetes / சர்க்கரை", d: "Metformin", ds: "500mg | With Meals", w: "Monitor kidney function regularly.", p: "Insulin is preferred.", a: "Adults mainly.", c: "Alt: Glimepiride.", s: "Gas, metallic taste", st: "Keep dry. Life: 2 years." },
-    "bp": { n: "High BP / ரத்த அழுத்தம்", d: "Amlodipine", ds: "5mg | Morning Fixed Time", w: "Do not stop suddenly. BP may spike.", p: "Consult Doctor. Avoided.", a: "Adults only.", c: "Alt: Telmisartan.", s: "Ankle swelling", st: "Protect from light. Life: 2 years." },
-    "body pain": { n: "Body Pain / உடல் வலி", d: "Diclofenac / Aceclofenac", ds: "50-100mg | After Food", w: "High risk of kidney damage if long term.", p: "Avoid in last 3 months.", a: "Adults mostly.", c: "Alt: Ibuprofen.", s: "Stomach irritation", st: "Cool place. Life: 3 years." },
-    "thyroid": { n: "Thyroid / தைராய்டு", d: "Levothyroxine", ds: "Based on TSH | Morning (Empty Stomach)", w: "Wait 1 hour before eating or tea/coffee.", p: "Crucial. Dose may increase.", a: "All ages.", c: "No alternatives for this hormone.", s: "Weight change, hair loss", st: "Dark, cool place." },
-    "cholesterol": { n: "Cholesterol / கொழுப்பு", d: "Atorvastatin", ds: "10-20mg | Night (Before Bed)", w: "Avoid Grapefruit. Report muscle pain.", p: "Strictly avoid.", a: "Adults.", c: "Alt: Rosuvastatin.", s: "Muscle pain, weakness", st: "Room temp. Life: 2 years." },
-    "arthritis": { n: "Arthritis / மூட்டு வலி", d: "Etoricoxib", ds: "60-90mg | After Food", w: "Not for heart patients.", p: "Avoid.", a: "Adults above 16.", c: "Alt: Naproxen.", s: "Fluid retention, dizziness", st: "Dry place. Life: 2 years." },
-    "anxiety": { n: "Anxiety / பதட்டம்", d: "Alprazolam (Zolax)", ds: "0.25mg | Night (As prescribed)", w: "Highly addictive. Strict medical supervision.", p: "Avoid. Can affect baby.", a: "Adults only.", c: "Alt: Diazepam.", s: "Drowsiness, confusion", st: "Schedule X. Keep locked." },
-    "infection": { n: "Infection / தொற்று", d: "Amoxicillin (Antibiotic)", ds: "500mg | Every 8-12 hours", w: "Complete the full course. Don't stop early.", p: "Generally safe.", a: "Dose varies by weight.", c: "Alt: Azithromycin.", s: "Loose stools, rash", st: "Below 25°C. Life: 2 years." },
-    "ulcer": { n: "Ulcer / புண்", d: "Sucralfate (Syrup)", ds: "10ml | 1 Hour before food", w: "Don't take other meds within 2 hours of this.", p: "Consult doctor.", a: "Adults.", c: "Alt: Antacids.", s: "Constipation", st: "Shake well before use." },
-    "skin rash": { n: "Skin Rash / தோல் தடிப்பு", d: "Hydrocortisone (Cream)", ds: "Apply thin layer | Twice a day", w: "Don't use on face for long time.", p: "Safe for short term.", a: "All ages.", c: "Alt: Calamine Lotion.", s: "Skin thinning, burning", st: "Keep tube closed." },
-    "migraine": { n: "Migraine / ஒற்றைத் தலைவலி", d: "Sumatriptan", ds: "25-50mg | When pain starts", w: "Not for heart or high BP patients.", p: "Consult Neurologist.", a: "Adults.", c: "Alt: Naproxen.", s: "Chest tightness, flushing", st: "Protect from light." },
-    "toothache": { n: "Toothache / பல் வலி", d: "Ketorolac (Keterol DT)", ds: "10mg | Dissolve in water", w: "Use for max 5 days. Hard on kidneys.", p: "Avoid.", a: "Adults.", c: "Alt: Ibuprofen + Paracetamol.", s: "Stomach pain", st: "Keep dry." },
-    "fungal": { n: "Fungal / படர்தாமரை", d: "Fluconazole", ds: "150mg | Once a week (Usually)", w: "Can interact with many other drugs.", p: "Avoid. Risk to fetus.", a: "Adults.", c: "Alt: Itraconazole.", s: "Stomach upset, liver changes", st: "Room temp." },
-    "piles": { n: "Piles / மூலம்", d: "Calcium Dobesilate", ds: "500mg | Twice a day", w: "Monitor for fever or sore throat.", p: "Consult doctor.", a: "Adults.", c: "Alt: Lidocaine Ointment.", s: "Fever, skin rash", st: "Cool place." },
-    "anemia": { n: "Anemia / ரத்த சோகை", d: "Ferrous Sulfate (Iron)", ds: "200mg | Empty Stomach (if tolerated)", w: "Do not take with tea, coffee or milk.", p: "Essential. Usually prescribed.", a: "All ages.", c: "Alt: Iron Injections.", s: "Black stool, constipation", st: "Keep away from kids." }
+    "fever": { n: "Fever / காய்ச்சல்", d: "Paracetamol (Dolo 650)", ds: "650mg, Max 4 times/day | After Food", w: "Do not exceed 4g/day. Liver damage risk.", p: "Safe under supervision.", a: "All ages (Dose varies)", c: "Ibuprofen", s: "Nausea, Rash", st: "Room Temp / 3 Years" },
+    "diabetes": { n: "Diabetes / சர்க்கரை நோய்", d: "Metformin (Glycomet)", ds: "500mg Once/Twice | With Meals", w: "Avoid if kidney problems exist.", p: "Consult specialist.", a: "Above 10 years", c: "Glimepiride", s: "Gas, Diarrhea", st: "Dry Place / 2 Years" },
+    "bp": { n: "High BP / இரத்த அழுத்தம்", d: "Amlodipine", ds: "5mg | Fixed Morning Time", w: "Do not stop suddenly.", p: "Avoid unless prescribed.", a: "Adults", c: "Telmisartan", s: "Ankle swelling", st: "Protect from light" },
+    "cold": { n: "Cold / சளி", d: "Cetirizine", ds: "10mg | Night Time", w: "Causes drowsiness. No driving.", p: "Consult doctor.", a: "Above 6 years", c: "Loratadine", s: "Sleepiness", st: "Cool dry place" },
+    "headache": { n: "Headache / தலைவலி", d: "Naproxen / Paracetamol", ds: "500mg | After Food", w: "Avoid on empty stomach.", p: "Safe in 1st/2nd trimester.", a: "Above 12 years", c: "Aspirin (Adults only)", s: "Gastritis", st: "Room Temp" },
+    "body pain": { n: "Body Pain / உடல் வலி", d: "Ibuprofen (Brufen)", ds: "400mg | After Food", w: "Risk of stomach ulcers.", p: "Avoid in late pregnancy.", a: "Above 12 years", c: "Diclofenac", s: "Stomach pain", st: "Cool place" },
+    "stomach pain": { n: "Stomach Pain / வயிற்று வலி", d: "Dicyclomine (Meftal Spas)", ds: "10-20mg | When needed", w: "Can cause dry mouth.", p: "Consult doctor.", a: "Children > 6 months", c: "Hyoscine", s: "Blurred vision", st: "Room Temp" },
+    "cough": { n: "Cough / இருமல்", d: "Dextromethorphan (Dry) / Guaifenesin (Wet)", ds: "10ml | 3 times daily", w: "Check for alcohol content.", p: "Consult doctor.", a: "Above 4 years", c: "Codeine (Strictly Rx)", s: "Dizziness", st: "Cool place" },
+    "acidity": { n: "Acidity / நெஞ்செரிச்சல்", d: "Pantoprazole", ds: "40mg | 30 min Before Breakfast", w: "Long term use affects B12.", p: "Generally safe.", a: "Adults", c: "Omeprazole", s: "Headache", st: "Below 30°C" },
+    "vomiting": { n: "Vomiting / வாந்தி", d: "Ondansetron (Vomistop)", ds: "4-8mg | Before Food", w: "May affect heart rhythm.", p: "Commonly used/Safe.", a: "All ages", c: "Domperidone", s: "Constipation", st: "Room Temp" },
+    "diarrhea": { n: "Diarrhea / வயிற்றுப்போக்கு", d: "Loperamide / ORS", ds: "2mg after each loose stool", w: "Do not use if fever is present.", p: "Consult doctor.", a: "Above 12 years (Loperamide)", c: "Racecadotril", s: "Cramps", st: "Dry place" },
+    "constipation": { n: "Constipation / மலச்சிக்கல்", d: "Bisacodyl (Dulcolax)", ds: "5-10mg | Night Time", w: "Laxative habit risk.", p: "Avoid stim. laxatives.", a: "Above 6 years", c: "Lactulose", s: "Abdominal cramps", st: "Room Temp" },
+    "asthma": { n: "Asthma / ஆஸ்துமா", d: "Salbutamol Inhaler", ds: "1-2 Puffs | Emergency", w: "Can cause rapid heartbeat.", p: "Crucial to control.", a: "All ages", c: "Budesonide", s: "Tremors", st: "Below 25°C" },
+    "thyroid": { n: "Thyroid / தைராய்டு", d: "Levothyroxine", ds: "25-100mcg | Early Morning Empty Stomach", w: "Wait 1 hour before eating.", p: "Mandatory treatment.", a: "All ages", c: "No direct alternative", s: "Palpitations", st: "Keep in dark" },
+    "cholesterol": { n: "Cholesterol / கொழுப்பு", d: "Atorvastatin (Lipitor)", ds: "10-20mg | Night Time", w: "Report muscle pain immediately.", p: "Strictly Avoided.", a: "Adults", c: "Rosuvastatin", s: "Muscle ache", st: "Room Temp" },
+    "arthritis": { n: "Arthritis / மூட்டு வலி", d: "Etoricoxib", ds: "60-90mg | After Food", w: "Kidney/Heart patients careful.", p: "Avoid.", a: "Adults", c: "Naproxen", s: "Swelling", st: "Cool place" },
+    "anxiety": { n: "Anxiety / பதட்டம்", d: "Alprazolam (Restyl)", ds: "0.25-0.5mg | As prescribed", w: "High addiction risk.", p: "Strictly Avoided.", a: "Adults", c: "Diazepam", s: "Drowsiness", st: "Safe Locker" },
+    "infection": { n: "Infection / தொற்று", d: "Amoxicillin (Antibiotic)", ds: "500mg | Every 8 hours", w: "Complete the full course.", p: "Generally safe.", a: "All ages", c: "Azithromycin", s: "Diarrhea", st: "Room Temp" },
+    "ulcer": { n: "Ulcer / புண்", d: "Sucralfate Syrup", ds: "10ml | 1 hour Before Food", w: "Do not take other meds with it.", p: "Consult doctor.", a: "Adults", c: "Ranitidine", s: "Constipation", st: "Cool place" },
+    "skin rash": { n: "Skin Rash / தோல் அரிப்பு", d: "Hydrocortisone / Calamine", ds: "Apply twice daily", w: "Don't use on broken skin.", p: "Consult doctor.", a: "All ages", c: "Betamethasone", s: "Skin thinning", st: "Room Temp" },
+    "migraine": { n: "Migraine / ஒற்றை தலைவலி", d: "Sumatriptan", ds: "50mg | At onset of pain", w: "Heart patients must avoid.", p: "Consult doctor.", a: "Adults", c: "Rizatriptan", s: "Tingling", st: "Cool place" },
+    "toothache": { n: "Toothache / பல் வலி", d: "Ketorolac (Ketanov)", ds: "10mg | Max 5 days", w: "Severe kidney risk if overused.", p: "Avoid.", a: "Adults", c: "Ibuprofen", s: "Stomach upset", st: "Room Temp" },
+    "eye infection": { n: "Eye Infection / கண் தொற்று", d: "Ciprofloxacin Drops", ds: "1-2 drops | 4 times/day", w: "Don't touch dropper tip.", p: "Safe.", a: "All ages", c: "Ofloxacin", s: "Stinging", st: "Discard after 1 month" },
+    "ear pain": { n: "Ear Pain / காது வலி", d: "Otogesic / Waxsol", ds: "2-3 drops | Twice daily", w: "Don't use if eardrum is torn.", p: "Consult doctor.", a: "All ages", c: "Neomycin", s: "Irritation", st: "Room Temp" },
+    "piles": { n: "Piles / மூலம்", d: "Pilex / Daflon", ds: "500mg | Twice Daily", w: "Increase fiber intake.", p: "Consult doctor.", a: "Adults", c: "Anovate cream", s: "Digestive issues", st: "Cool place" },
+    "gas": { n: "Gas / வாயுத் தொல்லை", d: "Simethicone (Digene)", ds: "1-2 tablets | Chew after food", w: "For temporary relief only.", p: "Safe.", a: "All ages", c: "Activated Charcoal", s: "None common", st: "Dry place" },
+    "insomnia": { n: "Insomnia / தூக்கமின்மை", d: "Melatonin / Zolpidem", ds: "3-5mg | 30 min Before Bed", w: "Risk of dependency.", p: "Avoid.", a: "Adults", c: "Alprazolam", s: "Daytime sleepiness", st: "Cool place" },
+    "anemia": { n: "Anemia / இரத்த சோகை", d: "Ferrous Sulfate (Iron)", ds: "1 tab | With Vitamin C", w: "Causes black stools (Normal).", p: "Highly recommended.", a: "All ages", c: "Iron Folic Acid", s: "Nausea", st: "Room Temp" },
+    "weakness": { n: "Weakness / உடல் சோர்வு", d: "Multivitamins (Revital)", ds: "1 Capsule | After Breakfast", w: "Not a substitute for food.", p: "Safe.", a: "Above 12 years", c: "B-Complex", s: "Yellow urine", st: "Cool place" },
+    "fungal": { n: "Fungal / படர்தாமரை", d: "Fluconazole / Itraconazole", ds: "150mg | Weekly/Daily", w: "Check liver function.", p: "Strictly Avoid.", a: "Adults", c: "Clotrimazole cream", s: "Liver enzyme changes", st: "Dry place" },
+    "vertigo": { n: "Vertigo / தலைச்சுற்றல்", d: "Betahistine (Vertin)", ds: "8-16mg | 3 times/day", w: "Caution with asthma.", p: "Consult doctor.", a: "Adults", c: "Cinnarizine", s: "Headache", st: "Cool place" },
+    "dandruff": { n: "Dandruff / பொடுகு", d: "Ketoconazole Shampoo", ds: "Twice weekly", w: "Keep away from eyes.", p: "Safe.", a: "Above 12 years", c: "Selenium sulfide", s: "Scalp dryness", st: "Room Temp" },
+    "burns": { n: "Burns / தீக்காயம்", d: "Silver Sulfadiazine", ds: "Apply layer | Twice daily", w: "For external use only.", p: "Safe.", a: "All ages", c: "Burnol", s: "Skin darkening", st: "Cool place" },
+    "scabies": { n: "Scabies / சொறி", d: "Permethrin Lotion", ds: "Apply neck to toe | Leave 8-12h", w: "Treat whole family.", p: "Consult doctor.", a: "Above 2 months", c: "Benzyl Benzoate", s: "Itching", st: "Cool place" },
+    "sinus": { n: "Sinus / சைனஸ்", d: "Oxymetazoline Spray", ds: "2 sprays | Max 3 days", w: "Using >3 days causes congestion.", p: "Consult doctor.", a: "Above 6 years", c: "Saline spray", s: "Nose dryness", st: "Room Temp" },
+    "heartburn": { n: "Heartburn / நெஞ்செரிச்சல்", d: "Ranitidine / Digene Gel", ds: "10ml | When needed", w: "Avoid spicy food.", p: "Generally safe.", a: "All ages", c: "Famotidine", s: "Constipation", st: "Cool place" },
+    "muscle cramp": { n: "Muscle Cramp / தசைப்பிடிப்பு", d: "Cyclobenzaprine", ds: "5-10mg | Before Bed", w: "Severe drowsiness.", p: "Consult doctor.", a: "Adults", c: "Chlorzoxazone", s: "Dry mouth", st: "Room Temp" },
+    "calcium": { n: "Calcium / கால்சியம்", d: "Calcium + Vit D3", ds: "500mg | After Food", w: "Drink plenty of water.", p: "Required.", a: "All ages", c: "Shellcal", s: "Constipation", st: "Dry place" },
+    "allergy cold": { n: "Allergy / அலர்ஜி", d: "Levocetirizine", ds: "5mg | Night Time", w: "Don't mix with alcohol.", p: "Consult doctor.", a: "Above 6 years", c: "Fexofenadine", s: "Drowsiness", st: "Room Temp" },
+    "dry skin": { n: "Dry Skin / வறண்ட தோல்", d: "Liquid Paraffin / Vaseline", ds: "Apply after bath", w: "For external use only.", p: "Safe.", a: "All ages", c: "Coconut Oil", s: "Greasy feel", st: "Room Temp" }
 };
 
-const select = document.getElementById('diseaseSelect');
-const diseases = Object.keys(medicalData).sort();
+// List including both English and Tamil for display
+const diseaseList = [
+    {id: "fever", text: "Fever / காய்ச்சல்"},
+    {id: "diabetes", text: "Diabetes / சர்க்கரை நோய்"},
+    {id: "bp", text: "High BP / இரத்த அழுத்தம்"},
+    {id: "cold", text: "Cold / சளி"},
+    {id: "headache", text: "Headache / தலைவலி"},
+    {id: "body pain", text: "Body Pain / உடல் வலி"},
+    {id: "stomach pain", text: "Stomach Pain / வயிற்று வலி"},
+    {id: "cough", text: "Cough / இருமல்"},
+    {id: "acidity", text: "Acidity / நெஞ்செரிச்சல்"},
+    {id: "vomiting", text: "Vomiting / வாந்தி"},
+    {id: "diarrhea", text: "Diarrhea / வயிற்றுப்போக்கு"},
+    {id: "constipation", text: "Constipation / மலச்சிக்கல்"},
+    {id: "asthma", text: "Asthma / ஆஸ்துமா"},
+    {id: "thyroid", text: "Thyroid / தைராய்டு"},
+    {id: "cholesterol", text: "Cholesterol / கொழுப்பு"},
+    {id: "arthritis", text: "Arthritis / மூட்டு வலி"},
+    {id: "anxiety", text: "Anxiety / பதட்டம்"},
+    {id: "infection", text: "Infection / தொற்று"},
+    {id: "ulcer", text: "Ulcer / புண்"},
+    {id: "skin rash", text: "Skin Rash / தோல் அரிப்பு"},
+    {id: "migraine", text: "Migraine / ஒற்றை தலைவலி"},
+    {id: "toothache", text: "Toothache / பல் வலி"},
+    {id: "eye infection", text: "Eye Infection / கண் தொற்று"},
+    {id: "ear pain", text: "Ear Pain / காது வலி"},
+    {id: "piles", text: "Piles / மூலம்"},
+    {id: "gas", text: "Gas / வாயுத் தொல்லை"},
+    {id: "insomnia", text: "Insomnia / தூக்கமின்மை"},
+    {id: "anemia", text: "Anemia / இரத்த சோகை"},
+    {id: "weakness", text: "Weakness / உடல் சோர்வு"},
+    {id: "fungal", text: "Fungal / படர்தாமரை"},
+    {id: "vertigo", text: "Vertigo / தலைச்சுற்றல்"},
+    {id: "dandruff", text: "Dandruff / பொடுகு"},
+    {id: "burns", text: "Burns / தீக்காயம்"},
+    {id: "scabies", text: "Scabies / சொறி"},
+    {id: "sinus", text: "Sinus / சைனஸ்"},
+    {id: "heartburn", text: "Heartburn / நெஞ்செரிச்சல்"},
+    {id: "muscle cramp", text: "Muscle Cramp / தசைப்பிடிப்பு"},
+    {id: "calcium", text: "Calcium / கால்சியம்"},
+    {id: "allergy cold", text: "Allergy / அலர்ஜி"},
+    {id: "dry skin", text: "Dry Skin / வறண்ட தோல்"}
+];
 
-diseases.forEach(dis => {
-    let opt = document.createElement('option');
-    opt.value = dis;
-    opt.innerHTML = medicalData[dis].n;
-    select.appendChild(opt);
-});
+const select = document.getElementById('diseaseSelect');
+
+// Function to populate dropdown
+function populateDropdown(list) {
+    select.innerHTML = '<option value="">-- Choose Disease / நோய் தேர்ந்தெடு --</option>';
+    list.sort((a, b) => a.text.localeCompare(b.text)).forEach(dis => {
+        let opt = document.createElement('option');
+        opt.value = dis.id;
+        opt.innerHTML = dis.text;
+        select.appendChild(opt);
+    });
+}
+
+// Initial Population
+populateDropdown(diseaseList);
+
+// Search Filtering
+function filterDiseases() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = diseaseList.filter(item => 
+        item.text.toLowerCase().includes(input)
+    );
+    populateDropdown(filtered);
+}
 
 function showData() {
     const val = select.value;
@@ -152,4 +230,4 @@ function showData() {
 }
 </script>
 </body>
-</html>
+</html>v
